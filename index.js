@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 // middleware initialization
@@ -26,6 +26,25 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const ServiceCollection =  client.db('car-doctor').collection('services');
+    app.get('/service',async(req,res)=>{
+      const cursor = ServiceCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    app.get('/service/:id',async(req,res)=>{
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id: new ObjectId(id)
+      };
+      const result = await ServiceCollection.findOne(query);
+      res.send(result);
+    })
+  
+
+   
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
