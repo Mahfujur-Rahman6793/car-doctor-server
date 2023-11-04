@@ -71,6 +71,22 @@ async function run() {
       const result =await CheckoutCollection.deleteOne(query);
       res.send(result);
     })
+
+    app.patch('/checkout/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter ={
+        _id:new ObjectId(id)
+      }
+      const checkout = req.body;
+      const updateDoc = {
+        $set: {
+          status: checkout.status
+        },
+      };
+
+      const result = await CheckoutCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
   
 
    
