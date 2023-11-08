@@ -7,6 +7,19 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const port = process.env.PORT || 5000;
 
+
+//custom middleware
+
+const logger = (req,res,next)=>{
+  console.log('Log Info : ',req.method,req.url);
+  next();
+}
+const verifyToken = (req,res,next)=>{
+  const token = req?.cookies?.token;
+  console.log('tok tok verify :',token);
+  next();
+}
+
 // middleware initialization
 app.use(cors(({
   origin:['http://localhost:5173','http://localhost:5174'],
@@ -35,6 +48,7 @@ async function run() {
     // auth realted api
     app.post('/jwt',async(req,res)=>{
       const user = req.body;
+      console.log(user);
       const token = jwt.sign(user,process.env.DB_TOKEN,{expiresIn:'1h'});
       res
       .cookie('token',token,{
@@ -43,6 +57,11 @@ async function run() {
         sameSite:'none'
       })
       .send({success:true})
+    })
+    app.post('/logout',async(req,res)=>{
+      const user = req.body;
+      
+      res.clearCookie('token').send({success:true})
     })
     // service realated api
 
@@ -61,7 +80,7 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/checkout',async(req,res)=>{
+    app.get('/checkout',logger,verifyToken,async(req,res)=>{
       console.log(req.query);
       let query = {};
 
